@@ -67,7 +67,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 # time.sleep(4)
                 driver.find_element_by_id("continue_button").click()
                 print("click continue to checkout button")
-                time.sleep(7)
+                time.sleep(5)
 
                 driver.switch_to.frame(1)
                 time.sleep(2)
@@ -134,7 +134,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 print("Submitted to Cloudinary")
                 print(Tests.query.all())
 
-                time.sleep(20)
+                time.sleep(10)
                 type_payment_info= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/type-payment-info{page_id}.png")
                 click_checkout_button= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/click-checkout-button{page_id}.png")
                 personal_info_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/person-information{page_id}.png")
@@ -148,52 +148,51 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 print(add_tocart_image.url)
                 print(click_payment_button_image.url)
                 print(product_page_image.url)
-                product_page_email= None
 
-                product_page_email=''
-                add_to_cart_email=''
-                personal_info_email=''
-                checkout_text_email=''
-                payment_info_email=''
-                payment_button_email=''
+                product_page_email= None
+                add_to_cart_email= None
+                personal_info_email= None
+                checkout_text_email= None
+                payment_info_email= None
+                payment_button_email= None
 
                 if go_product_page:
-                    product_page_email= "Pass"
+                    product_page_email= f"<h3 style='color:green'>Test Result: Pass</h3><img src={product_page_image.url} width='1000' height='500'>"
                 else: 
-                    product_page_email= "Fail"
+                    product_page_email= "<h3 style='color:red'>Test result:Fail</h3>"
           
                 if go_add_to_cart:
-                    add_to_cart_email= "Pass"
+                    add_to_cart_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={add_tocart_image.url} width='1000' height='500'/>"
                 else:
-                    add_to_cart_email= "Fail"
+                    add_to_cart_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
                 if go_personal_info:
-                    personal_info_email= "Pass"
+                    personal_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={personal_info_image.url} width='1000' height='500'/>"
                 else: 
-                    personal_info_email= "Fail"
+                    personal_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
                 if go_checkout_text:
-                    checkout_text_email= "Pass"
+                    checkout_text_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_checkout_button.url} width='1000' height='500'/>"
                 else:
-                    checkout_text_email= "Fail"
+                    checkout_text_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
                 if go_payment_info:
-                    payment_info_email= "Pass"
+                    payment_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={type_payment_info.url} width='1000' height='500'/>"
                 else: 
-                    payment_info_email= "Fail"
+                    payment_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
                 if go_payment_button:
-                    payment_button_email= "Pass"
+                    payment_button_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_payment_button_image.url} width='1000' height='500'/>"
                 else: 
-                    payment_button_email= "Fail"
+                    payment_button_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
                 requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
                 auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
                 data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
                 "to": "phananhtuan1011@gmail.com",
-                "subject": "Health Check Results: ",
+                "subject": f"Health Check Results: {home_url}",
                 "text": f"This is working",
-                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1></br><h3 style='text-align:center'>Product Page</h3><h3>Test Result:{product_page_email}</h3><img src={product_page_image.url} width='1000' height='500'><h3 style='text-align:center'>Click Add to Cart Button<h3><h3>Test Result:{add_to_cart_email}</h3><img src={add_tocart_image.url} width='1000' height='500'/><h3 style='text-align:center'>Type Shipping Info<h3><h3>Test Result:{personal_info_email}</h3><img src={personal_info_image.url} width='1000' height='500'/><h3 style='text-align:center'>Click Checkout Button<h3><h3>Test Result:{checkout_text_email}</h3><img src={click_checkout_button.url} width='1000' height='500'/><h3 style='text-align:center'>Type payment information<h3><h3>Test Result:{payment_info_email}</h3><img src={type_payment_info.url} width='1000' height='500'/><h3 style='text-align:center'>Click Payment button<h3><h3>Test Result:{payment_button_email}</h3><img src={click_payment_button_image.url} width='1000' height='500'/><html/>"})
+                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>{home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
                 print("send email")
 
             except:
@@ -233,7 +232,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 public_id = f"person-information{page_id}")
 
 
-                time.sleep(20)
+                time.sleep(10)
 
                 print(page_id,current_user.id)
                 type_payment_info= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/type-payment-info{page_id}.png")
@@ -250,6 +249,42 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 print(click_payment_button_image.url)
                 print(product_page_image.url)
 
+                product_page_email= None
+                add_to_cart_email= None
+                personal_info_email= None
+                checkout_text_email= None
+                payment_info_email= None
+                payment_button_email= None
+
+                if go_product_page:
+                    product_page_email= f"<h3 style='color:green'>Test Result: Pass</h3><img src={product_page_image.url} width='1000' height='500'>"
+                else: 
+                    product_page_email= "<h3 style='color:red'>Test result:Fail</h3>"
+          
+                if go_add_to_cart:
+                    add_to_cart_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={add_tocart_image.url} width='1000' height='500'/>"
+                else:
+                    add_to_cart_email= "<h3 style='color:red'>Test result:Fail</h3>"
+
+                if go_personal_info:
+                    personal_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={personal_info_image.url} width='1000' height='500'/>"
+                else: 
+                    personal_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
+
+                if go_checkout_text:
+                    checkout_text_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_checkout_button.url} width='1000' height='500'/>"
+                else:
+                    checkout_text_email= "<h3 style='color:red'>Test result:Fail</h3>"
+
+                if go_payment_info:
+                    payment_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={type_payment_info.url} width='1000' height='500'/>"
+                else: 
+                    payment_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
+
+                if go_payment_button:
+                    payment_button_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_payment_button_image.url} width='1000' height='500'/>"
+                else: 
+                    payment_button_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
 
                 requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
@@ -258,46 +293,46 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 "to": "phananhtuan1011@gmail.com",
                 "subject": "Health Check Results",
                 "text": f"This is working",
-                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1></br><h3 style='text-align:center'>Product Page</h3><h3>Test Result:{product_page_email}</h3><img src={product_page_image.url} width='1000' height='500'><h3 style='text-align:center'>Click Add to Cart Button<h3><h3>Test Result:{add_to_cart_email}</h3><img src={add_tocart_image.url} width='1000' height='500'/><h3 style='text-align:center'>Type Shipping Info<h3><h3>Test Result:{personal_info_email}</h3><img src={personal_info_image.url} width='1000' height='500'/><h3 style='text-align:center'>Click Checkout Button<h3><h3>Test Result:{checkout_text_email}</h3><img src={click_checkout_button.url} width='1000' height='500'/><h3 style='text-align:center'>Type payment information<h3><h3>Test Result:{payment_info_email}</h3><img src={type_payment_info.url} width='1000' height='500'/><h3 style='text-align:center'>Click Payment button<h3><h3>Test Result:{payment_button_email}</h3><img src={click_payment_button_image.url} width='1000' height='500'/><html/>"})
+                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>{home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
                 print("send email")
         #3 enter personal info
         def personalInfo(go_product_page,add_to_cart,checkout_test):
             try:
-                time.sleep(5)
+                time.sleep(3)
                 xpath="//input[contains(@placeholder, 'Email')]"
                 driver.find_element_by_xpath(xpath).send_keys("abc123@hotmail.com")
-                time.sleep(3)
+                time.sleep(1)
                 
                 xpath="//input[contains(@placeholder,'First name')]"
                 firstname= driver.find_element_by_xpath(xpath)
                 firstname.send_keys("Hasan")
                 print("type first name")
-                time.sleep(3)
+                time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Last name')]"
                 lastname= driver.find_element_by_xpath(xpath)
                 lastname.send_keys("Armstrong")
                 print("print last name")
-                time.sleep(3)
+                time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Address')]"
                 # formatXpath= xpath.format(address)
                 testaddress= driver.find_element_by_xpath(xpath)
                 testaddress.send_keys("12 Copac Square")
                 print("print address")
-                time.sleep(3)
+                time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'City')]"
                 testcity= driver.find_element_by_xpath(xpath)
                 testcity.send_keys("London")
                 print("print city")
-                time.sleep(3)
+                time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Postal code')]"
                 testpost_code= driver.find_element_by_xpath(xpath)
                 testpost_code.send_keys("111111")
                 print("print post code")
-                time.sleep(3)
+                time.sleep(1)
                 driver.save_screenshot("person-information.png")
                 # go to shipping page
                 # xpath= "//span[contains(text(),'Continue to shipping method')]"
@@ -306,7 +341,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 driver.save_screenshot("click-checkout-button.png")
                 print("click continue to shipping info button")
                 personal_info= True
-                time.sleep(5)
+                time.sleep(3)
                 payment(go_product_page,add_to_cart,checkout_test,personal_info)
             except NoSuchElementException:
                 personal_info= False

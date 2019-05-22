@@ -10,7 +10,10 @@ class User(UserMixin,db.Model):
   # __tablename__ = 'user'
   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
   email = db.Column(db.String(120), index=True, unique=True)
-  password_hash = db.Column(db.String(128), nullable=False)
+  firstname= db.Column(db.String(120))
+  lastname= db.Column(db.String(120))
+  storename= db.Column(db.String(120))
+  password_hash= db.Column(db.String(128), nullable=False)
   tests = db.relationship('Tests', backref='user', lazy=True)
   tokens = db.relationship('Token', backref='user', lazy=True)
 
@@ -21,7 +24,7 @@ class User(UserMixin,db.Model):
     return check_password_hash(self.password_hash, password)
 
   def __repr__(self):
-    return f"email:{self.email}, password: {self.password_hash}"
+    return f"email:{self.email}, password: {self.password_hash}, firstname: {self.firstname}"
 
 class Tests(db.Model):
   # __tablename__='tests'

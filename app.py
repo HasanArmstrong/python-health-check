@@ -21,6 +21,8 @@ import requests
 import cloudinary.uploader
 import cloudinary as Cloud
 from dotenv import load_dotenv
+import stripe
+
 
 load_dotenv()
 
@@ -29,6 +31,9 @@ Cloud.config.update = ({
     'api_key': os.environ.get('CLOUDINARY_API_KEY'),
     'api_secret': os.environ.get('CLOUDINARY_API_SECRET')
 })
+
+public_key= "pk_test_4ZPJTifa8os9KUcBKHN1ZPGn00sJ7YKaMR"
+stripe.api_key= "sk_test_aoBp967ac73oowOwJI9CKduE00WyKR2ajy"
 
 
 @login_manager.request_loader
@@ -46,10 +51,10 @@ def load_user_from_request(request):
 
 
 @app.route('/')
-def index():
-    return "this is it"
+def indexes():
+    return render_template("index.html")
 
-@app.route('/shopify-url', methods=['POST', 'GET'])
+@app.route('/shopify-url', methods=['POST'])
 def shopify():
     data = request.get_json()
     print(data)
@@ -66,6 +71,50 @@ def shopify():
     post_code=data['post_code']
     run_check(product_url,cart,check,home,email,first_name,second_name,address,city,post_code)
     return jsonify({'data': data})
+
+@app.route('/createuser', methods=['POST'])
+def adduser():
+    #get form input and check if username is already in database
+    data=request.get_json()
+    print(data)
+    email= data['email']
+    password= data['password']
+    firstname= data['firstname']
+    lastname= data['lastname']
+    storename= data['storename']
+    print(email)
+    print(password)
+  
+    signup_user= db.session.query(User).filter(User.email==email).first()  
+
+    # Add user to database
+    if signup_user is None:
+        #add email and password to db
+        print("user email is not in db")
+        add_user= User(email=email, firstname=firstname, lastname=lastname, storename=storename)
+        add_user.set_password(password)
+        db.session.add(add_user)
+        db.session.commit()
+        #create token
+        token = Token(user_id=add_user.id, uuid=str(uuid.uuid4().hex))    
+        db.session.add(token)
+        db.session.commit()  
+        #send email
+        print("these users were added to db",add_user.email, add_user.firstname, add_user.lastname, add_user.storename)
+        # requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
+        # auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
+        # data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
+        # "to": "phananhtuan1011@gmail.com",
+        # "subject": "Email Confirmation": f"{user.email}",
+        # "text": f"This is working",
+        # "html": "Click this link to confirm your accounts  "
+        # print("send email")
+        # return true when user has been added to db
+        return jsonify({"Account_Created": True})
+    else:
+        print("user is already in database")
+        return jsonify({'Account_Created': False})
+    return jsonify({'data': data })
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -94,7 +143,7 @@ def login():
     else:
         print("wrong username or password")
         return jsonify({
-            "error": "Something wrong with your login"
+            "error": "The email or password entered is incorrect"
         })
     
     return jsonify({'loginData': loginData})
@@ -122,6 +171,16 @@ def results():
     results=[dict(zip(key_list, pair)) for pair in zip(all_results_id, all_results_time_created)]
     return jsonify(results)
 
+@app.route('/userinfo', methods=['POST'])
+def userinfo():
+    secret_token_results=request.headers.get('Authorization')
+    user= User.query.get(current_user.id)
+    userfirstname= user.firstname
+    userstorename= user.storename
+    return jsonify({
+        'firstname': userfirstname,
+        'storename': userstorename
+        })
 
 @app.route("/results/<int:page_id>", methods= ['POST'])
 def myid(page_id):
@@ -156,6 +215,25 @@ def myid(page_id):
         "click_checkout_image": click_checkout_button.url
     })
 
+@app.route("/charge", methods=['POST'])
+def charge():
+    user_token=request.headers.get('Authorization')
+    print("charge",current_user.id)
+    user= User.query.get(current_user.id)
+    charge_email= user.email
+    print(charge_email)
+    token= request.get_json()
+    print(token)
+    data= stripe.Charge.create(
+    amount=999,
+    currency="usd",
+    source= "tok_visa "+token, # obtained with Stripe.js
+    description=f"Charge for {charge_email}"
+    )
+  
+    charge = stripe.Charge.retrieve(data.id,api_key="sk_test_aoBp967ac73oowOwJI9CKduE00WyKR2ajy")
+    print("***",charge)
+    return jsonify({"data": charge})
 
 if __name__ == '__main__':
     app.run()
