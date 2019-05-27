@@ -22,6 +22,7 @@ import cloudinary.uploader
 import cloudinary as Cloud
 from dotenv import load_dotenv
 import stripe
+from procheck import proplan
 
 
 load_dotenv()
@@ -69,7 +70,8 @@ def shopify():
     address=data['address']
     city=data['city']
     post_code=data['post_code']
-    run_check(product_url,cart,check,home,email,first_name,second_name,address,city,post_code)
+    # ,home,email,first_name,second_name,address,city,post_code
+    run_check(product_url,cart,check,home)
     return jsonify({'data': data})
 
 @app.route('/createuser', methods=['POST'])
@@ -101,15 +103,6 @@ def adduser():
         db.session.commit()  
         #send email
         print("these users were added to db",add_user.email, add_user.firstname, add_user.lastname, add_user.storename)
-        # requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
-        # auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
-        # data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
-        # "to": "phananhtuan1011@gmail.com",
-        # "subject": "Email Confirmation": f"{user.email}",
-        # "text": f"This is working",
-        # "html": "Click this link to confirm your accounts  "
-        # print("send email")
-        # return true when user has been added to db
         return jsonify({"Account_Created": True})
     else:
         print("user is already in database")
@@ -234,6 +227,39 @@ def charge():
     charge = stripe.Charge.retrieve(data.id,api_key="sk_test_aoBp967ac73oowOwJI9CKduE00WyKR2ajy")
     print("***",charge)
     return jsonify({"data": charge})
+
+@app.route("/proplan", methods=['POST'])
+def pro():
+    data= request.get_json()
+    first_step_text= data['first']
+    second_step_text= data['second']
+    third_step_text= data['third']
+    product_url=data['productPage']
+    home= data['home']
+
+    isPro= True
+    print(data)
+    # first_action,second_action,home,isPro
+    run_check(product_url,first_step_text,third_step_text,home,second_step_text,isPro)
+    return jsonify({'data':data})
+
+@app.route("/upgrade", methods=['POST'])
+def upgraded_pro():
+    user_token=request.headers.get('Authorization')
+    print("charge",current_user.id)
+    user= User.query.get(current_user.id)
+    user.upgraded= True
+    db.session.commit()
+    upgraded_user= user.upgraded
+    return jsonify({'data': upgraded_user})
+
+@app.route("/checkupgradedstatus", methods=['POST'])
+def check_upgraded_status():
+    user_token=request.headers.get('Authorization')
+    user= User.query.get(current_user.id)
+    check_upgraded= user.upgraded
+    print("upgraded status", user.upgraded)
+    return jsonify({'data':check_upgraded})
 
 if __name__ == '__main__':
     app.run()

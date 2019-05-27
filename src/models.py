@@ -13,6 +13,7 @@ class User(UserMixin,db.Model):
   firstname= db.Column(db.String(120))
   lastname= db.Column(db.String(120))
   storename= db.Column(db.String(120))
+  upgraded= db.Column(db.Boolean, server_default=expression.false())
   password_hash= db.Column(db.String(128), nullable=False)
   tests = db.relationship('Tests', backref='user', lazy=True)
   tokens = db.relationship('Token', backref='user', lazy=True)
@@ -24,7 +25,7 @@ class User(UserMixin,db.Model):
     return check_password_hash(self.password_hash, password)
 
   def __repr__(self):
-    return f"email:{self.email}, password: {self.password_hash}, firstname: {self.firstname}"
+    return f"email:{self.email}, password: {self.password_hash}, firstname: {self.firstname}, upgraded: {self.upgraded}"
 
 class Tests(db.Model):
   # __tablename__='tests'

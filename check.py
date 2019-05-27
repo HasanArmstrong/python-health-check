@@ -18,9 +18,13 @@ from flask import session, Flask
 from sqlalchemy import desc
 import cloudinary.uploader
 import cloudinary as Cloud
+from selenium.webdriver.common.keys import Keys
 
-def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,last_name,address,city,post_code):
-    print(cart_text)
+
+# home_url,placeholder_email,first_name,last_name,address,city,post_code
+def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
+    print("****",third)
+    print(cart_text) 
     # Gets the path to the right chromedriver
     path = "$PATH:/Users/pc/Desktop/shophealthcheck" + platform.system()
     links = [url]
@@ -76,7 +80,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 time.sleep(2)
 
                 driver.switch_to.frame(2)
-                driver.find_element_by_id("name").send_keys("Chares Lee")
+                driver.find_element_by_id("name").send_keys("Charles Lee")
                 time.sleep(2)
                 driver.switch_to_default_content()
 
@@ -84,13 +88,14 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 expiry= driver.find_element_by_id("expiry")
                 expiry.send_keys("0927")
                 driver.switch_to_default_content()
-                time.sleep(1)
+                time.sleep(2)
 
                 driver.switch_to.frame(4)
                 security_code= driver.find_element_by_id("verification_value")
                 security_code.send_keys("101")
                 driver.switch_to_default_content()
-                time.sleep(1)
+                time.sleep(2)
+                print("arrived here ******1")
                 driver.save_screenshot("type-payment-info.png")
                 go_payment_info= True
                 driver.switch_to_default_content()
@@ -103,6 +108,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 db.session.add(Tests(user_id=current_user.id, product_page=go_product_page, add_to_cart=go_add_to_cart,go_to_checkout=go_checkout_text,personal_info=go_personal_info, payment_info=go_payment_info, payment_button=go_payment_button))
                 db.session.commit()
                 print("submmited to database")
+
                 #submit to cloduinary
                 last_test= Tests.query.order_by(desc('id')).first()
                 page_id= last_test.id
@@ -131,6 +137,14 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 folder = f"my_folder/{current_user.id}/", 
                 public_id = f"person-information{page_id}")
 
+                Cloud.uploader.upload("./changeinput.png", 
+                folder = f"my_folder/{current_user.id}/", 
+                public_id = f"changeinput{page_id}")
+
+                Cloud.uploader.upload("./outofstock.png", 
+                folder = f"my_folder/{current_user.id}/", 
+                public_id = f"outofstock{page_id}")
+
                 print("Submitted to Cloudinary")
                 print(Tests.query.all())
 
@@ -141,6 +155,10 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 add_tocart_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/add-to-cart{page_id}.png")
                 click_payment_button_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/clickpaymentbutton{page_id}.png")
                 product_page_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/product-page{page_id}.png")
+                change_quantity_input= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/changeinput{page_id}.png")
+                out_of_stock= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/outofstock{page_id}.png")
+
+                print("arrived here ******2")
 
                 print(type_payment_info.url)
                 print(click_checkout_button.url)
@@ -156,44 +174,79 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 payment_info_email= None
                 payment_button_email= None
 
+                pro_plan_notification= None
+
+                print("arrived here ******3")
+              
+
                 if go_product_page:
                     product_page_email= f"<h3 style='color:green'>Test Result: Pass</h3><img src={product_page_image.url} width='1000' height='500'>"
                 else: 
                     product_page_email= "<h3 style='color:red'>Test result:Fail</h3>"
-          
+
+                print("arrived here ******4")
+
                 if go_add_to_cart:
                     add_to_cart_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={add_tocart_image.url} width='1000' height='500'/>"
                 else:
                     add_to_cart_email= "<h3 style='color:red'>Test result:Fail</h3>"
+
+                print("arrived here ******5")
 
                 if go_personal_info:
                     personal_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={personal_info_image.url} width='1000' height='500'/>"
                 else: 
                     personal_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
+                print("arrived here ******6")
+
                 if go_checkout_text:
                     checkout_text_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_checkout_button.url} width='1000' height='500'/>"
                 else:
                     checkout_text_email= "<h3 style='color:red'>Test result:Fail</h3>"
+                
+                print("arrived here ******7")
 
                 if go_payment_info:
                     payment_info_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={type_payment_info.url} width='1000' height='500'/>"
                 else: 
                     payment_info_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
+                print("arrived here ******8")
+
                 if go_payment_button:
                     payment_button_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={click_payment_button_image.url} width='1000' height='500'/>"
                 else: 
                     payment_button_email= "<h3 style='color:red'>Test result:Fail</h3>"
+                
+                print("arrived here ******9")
+                
+                
 
-                requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
-                auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
-                data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
-                "to": "phananhtuan1011@gmail.com",
-                "subject": f"Health Check Results: {home_url}",
-                "text": f"This is working",
-                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>{home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
-                print("send email")
+                print("arrived here ******10")
+            
+                if isPro:
+                    change_quantity_input_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={change_quantity_input.url} width='1000' height='500'/>"
+                    outofstock_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={outofstock_email.url} width='1000' height='500'/>"
+                    requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
+                    auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
+                    data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
+                    "to": "phananhtuan1011@gmail.com",
+                    "subject": f"Health Check Results:Store url: {home_url}",
+                    "text": f"This is working",
+                    "html": f"<html><h1 style='text-align:center'>Pro Health Check Report</h1><h2>Store url: {home_url}</h2></br><h3 style='text-align:center'>#1 First Step</h3>{product_page_email}<h3 style='text-align:center'>#2 Second Step</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Third Step<h3>{change_quantity_input_email}<h3 style='text-align:center'>#4 Fourth step<h3>{outofstock_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
+                    print("send pro plan email")
+                else:
+                    requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
+                    auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
+                    data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
+                    "to": "phananhtuan1011@gmail.com",
+                    "subject": f"Health Check Results: {home_url}",
+                    "text": f"This is working",
+                    "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>Store url: {home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
+                    print("send email, arrived here 5")
+                    
+                    
 
             except:
                 go_payment_info= False
@@ -231,6 +284,14 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 folder = f"my_folder/{current_user.id}/", 
                 public_id = f"person-information{page_id}")
 
+                Cloud.uploader.upload("./changeinput.png", 
+                folder = f"my_folder/{current_user.id}/", 
+                public_id = f"changeinput{page_id}")
+
+                Cloud.uploader.upload("./outofstock.png", 
+                folder = f"my_folder/{current_user.id}/", 
+                public_id = f"outofstock{page_id}")
+
 
                 time.sleep(10)
 
@@ -241,6 +302,9 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 add_tocart_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/add-to-cart{page_id}.png")
                 click_payment_button_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/clickpaymentbutton{page_id}.png")
                 product_page_image= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/product-page{page_id}.png")
+                change_quantity_input= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/changeinput{page_id}.png")
+                out_of_stock= Cloud.CloudinaryImage(f"my_folder/{current_user.id}/outofstock{page_id}.png")
+
 
                 print(type_payment_info.url)
                 print(click_checkout_button.url)
@@ -248,6 +312,8 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 print(add_tocart_image.url)
                 print(click_payment_button_image.url)
                 print(product_page_image.url)
+                print('testing',change_quantity_input.url)
+                print('testing2', out_of_stock.url)
 
                 product_page_email= None
                 add_to_cart_email= None
@@ -255,6 +321,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 checkout_text_email= None
                 payment_info_email= None
                 payment_button_email= None
+                change_quantity_input_email= None
 
                 if go_product_page:
                     product_page_email= f"<h3 style='color:green'>Test Result: Pass</h3><img src={product_page_image.url} width='1000' height='500'>"
@@ -286,15 +353,28 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 else: 
                     payment_button_email= "<h3 style='color:red'>Test result:Fail</h3>"
 
-
-                requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
-                auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
-                data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
-                "to": "phananhtuan1011@gmail.com",
-                "subject": "Health Check Results",
-                "text": f"This is working",
-                "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>{home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
-                print("send email")
+                
+                if isPro:
+                    change_quantity_input_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={change_quantity_input.url} width='1000' height='500'/>"
+                    outofstock_email= f"<h3 style='color:green'>Test result:Pass</h3><img src={out_of_stock.url} width='1000' height='500'/>"
+                    requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
+                    auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
+                    data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
+                    "to": "phananhtuan1011@gmail.com",
+                    "subject": f"Pro Health Check Results: {home_url}",
+                    "text": f"This is working",
+                    "html": f"<html><h1 style='text-align:center'>Pro Health Check Report</h1><h2>Store url: {home_url}</h2></br><h3 style='text-align:center'>#1 First Step</h3>{product_page_email}<h3 style='text-align:center'>#2 Second Step</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Third Step<h3>{change_quantity_input_email}<h3 style='text-align:center'>#4 Fourth step<h3>{outofstock_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
+                    print("pro plan send email")
+                else:
+                    requests.post("https://api.mailgun.net/v3/sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org/messages",
+                    auth=("api", "1ea281e23190f090dcfe8d12336cad0c-7bce17e5-9bac263c"),
+                    data={"from": "Hasan: <postmaster@sandbox46bbbb850d304e6396c09ddbb7703a21.mailgun.org>",
+                    "to": "phananhtuan1011@gmail.com",
+                    "subject": f"Health Check Results: {home_url}",
+                    "text": f"This is working",
+                    "html": f"<html><h1 style='text-align:center'>Health Check Report</h1><h2>Store url: {home_url}</h2></br><h3 style='text-align:center'>#1 Product Page</h3>{product_page_email}<h3 style='text-align:center'>#2 Click Add to Cart Button</h3>{add_to_cart_email}<h3 style='text-align:center'>#3 Type Shipping Info<h3>{personal_info_email}<h3 style='text-align:center'>#4 Click Checkout Button<h3>{checkout_text_email}<h3 style='text-align:center'>#5 Type payment information<h3>{payment_info_email}<h3 style='text-align:center'>#6 Click Payment button<h3>{payment_button_email}<html/>"})
+                    print("send email")
+                    
         #3 enter personal info
         def personalInfo(go_product_page,add_to_cart,checkout_test):
             try:
@@ -305,13 +385,13 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 
                 xpath="//input[contains(@placeholder,'First name')]"
                 firstname= driver.find_element_by_xpath(xpath)
-                firstname.send_keys("Hasan")
+                firstname.send_keys("Charles")
                 print("type first name")
                 time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Last name')]"
                 lastname= driver.find_element_by_xpath(xpath)
-                lastname.send_keys("Armstrong")
+                lastname.send_keys("Lee")
                 print("print last name")
                 time.sleep(1)
 
@@ -324,7 +404,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
 
                 xpath="//input[contains(@placeholder,'City')]"
                 testcity= driver.find_element_by_xpath(xpath)
-                testcity.send_keys("London")
+                testcity.send_keys("Saigon")
                 print("print city")
                 time.sleep(1)
 
@@ -335,7 +415,6 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 time.sleep(1)
                 driver.save_screenshot("person-information.png")
                 # go to shipping page
-                # xpath= "//span[contains(text(),'Continue to shipping method')]"
                 driver.find_element_by_id("continue_button").click()
                 time.sleep(2)
                 driver.save_screenshot("click-checkout-button.png")
@@ -349,16 +428,9 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 print("personal info form input didn't work")
 
 
-
-
-
-            
-
         #2) Go to checkout
         def checkout(go_product_page, add_to_cart):
-            print(checkout_text)
-            print("run checkout")
-        #go to checkout 
+            print("run checkout is running*****")
             try:
                 time.sleep(3)
                 xpath="//a[contains(@value,'{0}')]"
@@ -368,7 +440,7 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 driver.save_screenshot("checkout.png")
                 time.sleep(4)
                 checkout= True
-                personalInfo(go_product_page, add_to_cart, checkout)
+                personalInfo(go_product_page,add_to_cart,checkout)
             except NoSuchElementException:
                 try:
                     time.sleep(3)
@@ -385,125 +457,320 @@ def run_check(url,cart_text,checkout_text,home_url,placeholder_email,first_name,
                 except NoSuchElementException:
                     try:
                         time.sleep(3)
-                        xpath="//span[contains(@value,'{0}')]"
+                        xpath="//button[contains(@value,'{0}')]"
                         formatXpath= xpath.format(checkout_text)
-                        go_to_checkout_span= driver.find_element_by_xpath(formatXpath).click()
-                        time.sleep(3)
-                        print("span tag with {0}")
-                        driver.save_screenshot("checkout.png")
-                        checkout= True
-                        personalInfo(go_product_page, add_to_cart, checkout)
+                        #check if element is clickable
+                        if element_to_be_clickable(formatXpath):
+                            print("checkout is found and can be clicked")
+                            driver.find_element_by_xpath(formatXpath).click()
+                            driver.save_screenshot("personal-information.png")
+                            time.sleep(2)
+                            checkout= True
+                            personalInfo(go_product_page, add_to_cart, checkout)
                     except NoSuchElementException:
                         try:
                             time.sleep(3)
-                            xpath="//div[contains(@value,'{0}')]"
+                            xpath="//span[contains(@value,'{0}')]"
                             formatXpath= xpath.format(checkout_text)
-                            driver.find_element_by_xpath(formatXpath).click()
+                            go_to_checkout_span= driver.find_element_by_xpath(formatXpath).click()
                             time.sleep(3)
-                            cart_button.click()
-                            print("div tag with {0}")
+                            print("span tag with {0}")
                             driver.save_screenshot("checkout.png")
-                            print(go_to_checkout_div)
                             checkout= True
                             personalInfo(go_product_page, add_to_cart, checkout)
-                            time.sleep(5)
                         except NoSuchElementException:
-                            checkout= False
-                            personalInfo(go_product_page, add_to_cart, checkout)
-                            print("Can't find checkout button")
+                            try:
+                                time.sleep(3)
+                                xpath="//div[contains(@value,'{0}')]"
+                                formatXpath= xpath.format(checkout_text)
+                                driver.find_element_by_xpath(formatXpath).click()
+                                time.sleep(3)
+                                cart_button.click()
+                                print("div tag with {0}")
+                                driver.save_screenshot("checkout.png")
+                                print(go_to_checkout_div)
+                                checkout= True
+                                personalInfo(go_product_page, add_to_cart, checkout)
+                                time.sleep(5)
+                            except NoSuchElementException:
+                                checkout= False
+                                personalInfo(go_product_page, add_to_cart, checkout)
+                                print("Can't find checkout button")
 
-        #add to cart
+      
         time.sleep(3)
-
-        print("*****",current_user.id)
-        driver.set_window_size(desktop['width'], desktop['height'])
-        driver.get(linkWithProtocol)
-        go_product_page=True
-        time.sleep(5)
-        driver.save_screenshot("product-page.png")
         
-    
-        # 1) Find cart INPUT element with text/value
-        try:
-            xpath="//span[contains(text(),'{0}')]"
-            formatXpath= xpath.format(cart_text)
-            if element_to_be_clickable(formatXpath):
-                print("found cart span with tag name input with text")
-                driver.find_element_by_xpath(formatXpath).click()
-                time.sleep(3)
-                driver.save_screenshot("add-to-cart.png")
-                add_to_cart= True
-                checkout(go_product_page,add_to_cart)
-        except NoSuchElementException:
+        if(isPro):
+                #PRO PLAN
+            def takeScreenshot(go_product_page,add_to_cart,checkout):
+                print("inside take screenshot pro")
+                time.sleep(5)
+                driver.save_screenshot("outofstock.png")
+                personalInfo(go_product_page,add_to_cart,checkout)
+
+            def checkout_pro(go_product_page, add_to_cart):
+                print("run pro checkout 21312")
+            #go to checkout 
+                try:
+                    time.sleep(3)
+                    xpath="//a[contains(@value,'{0}')]"
+                    formatXpath= xpath.format(checkout_text)
+                    go_to_checkout_a= driver.find_element_by_xpath(formatXpath).click()
+                    time.sleep(3)
+                    driver.save_screenshot("checkout.png")
+                    time.sleep(4)
+                    checkout= True
+                    takeScreenshot(go_product_page,add_to_cart,checkout)
+                except NoSuchElementException:
+                    try:
+                        time.sleep(3)
+                        xpath="//input[contains(@value,'{0}')]"
+                        formatXpath= xpath.format(checkout_text)
+                        #check if element is clickable
+                        if element_to_be_clickable(formatXpath):
+                            print("element is found and can be clicked")
+                            driver.find_element_by_xpath(formatXpath).click()
+                            driver.save_screenshot("personal-information.png")
+                            time.sleep(2)
+                            checkout= True
+                            takeScreenshot(go_product_page,add_to_cart,checkout)
+                    except NoSuchElementException:
+                        try:
+                            time.sleep(3)
+                            xpath="//button[contains(@value,'{0}')]"
+                            formatXpath= xpath.format(checkout_text)
+                            #check if element is clickable
+                            if element_to_be_clickable(formatXpath):
+                                print("checkout is found and can be clicked")
+                                driver.find_element_by_xpath(formatXpath).click()
+                                driver.save_screenshot("personal-information.png")
+                                time.sleep(2)
+                                checkout= True
+                                takeScreenshot(go_product_page,add_to_cart,checkout)
+                        except NoSuchElementException:
+                            try:
+                                time.sleep(3)
+                                xpath="//span[contains(@value,'{0}')]"
+                                formatXpath= xpath.format(checkout_text)
+                                go_to_checkout_span= driver.find_element_by_xpath(formatXpath).click()
+                                time.sleep(3)
+                                print("span tag with {0}")
+                                driver.save_screenshot("checkout.png")
+                                checkout= True
+                                takeScreenshot(go_product_page,add_to_cart,checkout)
+                            except NoSuchElementException:
+                                try:
+                                    time.sleep(3)
+                                    xpath="//div[contains(@value,'{0}')]"
+                                    formatXpath= xpath.format(checkout_text)
+                                    driver.find_element_by_xpath(formatXpath).click()
+                                    time.sleep(3)
+                                    cart_button.click()
+                                    print("div tag with {0}")
+                                    driver.save_screenshot("checkout.png")
+                                    print(go_to_checkout_div)
+                                    checkout= True
+                                    takeScreenshot(go_product_page,add_to_cart,checkout)
+                                    time.sleep(5)
+                                except NoSuchElementException:
+                                    checkout= False
+                                    takeScreenshot(go_product_page,add_to_cart,checkout)
+                                    print("Can't find checkout button")
+
+            def changeInput(go_product_page,add_to_cart,third):
+                try:
+                    xpath="//input[@name='updates[12513323647024]']"
+                    # formatXpath= xpath.format(address)
+                    testinput= driver.find_element_by_xpath(xpath)
+                    testinput.send_keys(Keys.BACKSPACE)
+                    print(third)
+                    testinput.send_keys(third)
+                    formatXpath= xpath.format(third)
+                    print("change input")
+                    time.sleep(3)
+                    driver.save_screenshot("changeinput.png")
+                    checkout_pro(go_product_page,add_to_cart)
+
+                except NoSuchElementException:
+                    print("Could not find")
+
+            print("currently in pro plan")
+            driver.set_window_size(desktop['width'], desktop['height'])
+            driver.get(linkWithProtocol)
+            go_product_page=True
+            time.sleep(5)
+            driver.save_screenshot("product-page.png")
+            print("currently in pro plan")
+                 #first action click (must be button, span or input)
             try:
-                xpath="//input[contains(@value,'{0}')]"
+                xpath="//span[contains(text(),'{0}')]"
                 formatXpath= xpath.format(cart_text)
                 if element_to_be_clickable(formatXpath):
+                    print("found cart span with tag name input with text")
                     driver.find_element_by_xpath(formatXpath).click()
                     time.sleep(3)
                     driver.save_screenshot("add-to-cart.png")
-                    print("found cart button with input value")
                     add_to_cart= True
-                    checkout(go_product_page,add_to_cart)
+                    changeInput(go_product_page,add_to_cart,third)
             except NoSuchElementException:
-                # Find cart BUTTON element with text/value
                 try:
-                    xpath="//button[contains(text(),'{0}')]"
+                    xpath="//input[contains(@value,'{0}')]"
                     formatXpath= xpath.format(cart_text)
-                    driver.find_element_by_xpath(formatXpath).click()
-                    time.sleep(3)
-                    driver.save_screenshot("add-to-cart.png")
-                    print("found cart button with tag name button with text")
-                    add_to_cart= True
-                    checkout(go_product_page,add_to_cart)
+                    if element_to_be_clickable(formatXpath):
+                        driver.find_element_by_xpath(formatXpath).click()
+                        time.sleep(3)
+                        driver.save_screenshot("add-to-cart.png")
+                        print("found cart button with input value")
+                        add_to_cart= True
+                        changeInput(go_product_page,add_to_cart,third)
                 except NoSuchElementException:
-                    try: 
-                        xpath="//button[contains(@value,'{0}')]"
+                    # Find cart BUTTON element with text/value
+                    try:
+                        xpath="//button[contains(text(),'{0}')]"
                         formatXpath= xpath.format(cart_text)
                         driver.find_element_by_xpath(formatXpath).click()
                         time.sleep(3)
                         driver.save_screenshot("add-to-cart.png")
-                        print("found cart button with button value")
+                        print("found cart button with tag name button with text")
                         add_to_cart= True
-                        checkout(go_product_page,add_to_cart)
+                        changeInput(go_product_page,add_to_cart,third)
                     except NoSuchElementException:
-                        # Find cart SPAN element element with text/value
-                        try:
-                            xpath="//span[contains(text(),'{0}')]"
+                        try: 
+                            xpath="//button[contains(@value,'{0}')]"
                             formatXpath= xpath.format(cart_text)
                             driver.find_element_by_xpath(formatXpath).click()
                             time.sleep(3)
                             driver.save_screenshot("add-to-cart.png")
-                            print("found cart button with tag name span with text")
+                            print("found cart button with button value")
                             add_to_cart= True
-                            checkout(go_product_page,add_to_cart)
+                            changeInput(go_product_page,add_to_cart,third)
                         except NoSuchElementException:
+                            # Find cart SPAN element element with text/value
                             try:
-                                xpath="//div[contains(text(),'{0}')]"
+                                xpath="//span[contains(text(),'{0}')]"
                                 formatXpath= xpath.format(cart_text)
                                 driver.find_element_by_xpath(formatXpath).click()
                                 time.sleep(3)
                                 driver.save_screenshot("add-to-cart.png")
-                                print("found cart button with tag name div with text")
+                                print("found cart button with tag name span with text")
                                 add_to_cart= True
-                                checkout(go_product_page,add_to_cart)
+                                changeInput(go_product_page,add_to_cart)
                             except NoSuchElementException:
                                 try:
-                                    xpath="//span[contains(@value,'{0}')]"
+                                    xpath="//div[contains(text(),'{0}')]"
                                     formatXpath= xpath.format(cart_text)
                                     driver.find_element_by_xpath(formatXpath).click()
                                     time.sleep(3)
                                     driver.save_screenshot("add-to-cart.png")
-                                    print("found cart button with span value")
+                                    print("found cart button with tag name div with text")
+                                    add_to_cart= True
+                                    changeInput(go_product_page,add_to_cart,third)
+                                except NoSuchElementException:
+                                    try:
+                                        xpath="//span[contains(@value,'{0}')]"
+                                        formatXpath= xpath.format(cart_text)
+                                        driver.find_element_by_xpath(formatXpath).click()
+                                        time.sleep(3)
+                                        driver.save_screenshot("add-to-cart.png")
+                                        print("found cart button with span value")
+                                        add_to_cart= True
+                                        changeInput(go_product_page,add_to_cart,third)
+                                    except NoSuchElementException:
+                                        add_to_cart= False
+                                        changeInput(go_product_page,add_to_cart)
+                                        print("Could not find add to cart element")           
+        else:
+            #NORMAL
+            #add to cart
+            print("in normal plan")
+            print("*****",current_user.id)
+            driver.set_window_size(desktop['width'], desktop['height'])
+            driver.get(linkWithProtocol)
+            go_product_page=True
+            time.sleep(5)
+            driver.save_screenshot("product-page.png")
+            
+            # 1) Find cart INPUT element with text/value
+            try:
+                xpath="//span[contains(text(),'{0}')]"
+                formatXpath= xpath.format(cart_text)
+                if element_to_be_clickable(formatXpath):
+                    print("found cart span with tag name input with text")
+                    driver.find_element_by_xpath(formatXpath).click()
+                    time.sleep(3)
+                    driver.save_screenshot("add-to-cart.png")
+                    add_to_cart= True
+                    checkout(go_product_page,add_to_cart)
+            except NoSuchElementException:
+                try:
+                    xpath="//input[contains(@value,'{0}')]"
+                    formatXpath= xpath.format(cart_text)
+                    if element_to_be_clickable(formatXpath):
+                        driver.find_element_by_xpath(formatXpath).click()
+                        time.sleep(3)
+                        driver.save_screenshot("add-to-cart.png")
+                        print("found cart button with input value")
+                        add_to_cart= True
+                        checkout(go_product_page,add_to_cart)
+                except NoSuchElementException:
+                    # Find cart BUTTON element with text/value
+                    try:
+                        xpath="//button[contains(text(),'{0}')]"
+                        formatXpath= xpath.format(cart_text)
+                        driver.find_element_by_xpath(formatXpath).click()
+                        time.sleep(3)
+                        driver.save_screenshot("add-to-cart.png")
+                        print("found cart button with tag name button with text")
+                        add_to_cart= True
+                        checkout(go_product_page,add_to_cart)
+                    except NoSuchElementException:
+                        try: 
+                            xpath="//button[contains(@value,'{0}')]"
+                            formatXpath= xpath.format(cart_text)
+                            driver.find_element_by_xpath(formatXpath).click()
+                            time.sleep(3)
+                            driver.save_screenshot("add-to-cart.png")
+                            print("found cart button with button value")
+                            add_to_cart= True
+                            checkout(go_product_page,add_to_cart)
+                        except NoSuchElementException:
+                            # Find cart SPAN element element with text/value
+                            try:
+                                xpath="//span[contains(text(),'{0}')]"
+                                formatXpath= xpath.format(cart_text)
+                                driver.find_element_by_xpath(formatXpath).click()
+                                time.sleep(3)
+                                driver.save_screenshot("add-to-cart.png")
+                                print("found cart button with tag name span with text")
+                                add_to_cart= True
+                                checkout(go_product_page,add_to_cart)
+                            except NoSuchElementException:
+                                try:
+                                    xpath="//div[contains(text(),'{0}')]"
+                                    formatXpath= xpath.format(cart_text)
+                                    driver.find_element_by_xpath(formatXpath).click()
+                                    time.sleep(3)
+                                    driver.save_screenshot("add-to-cart.png")
+                                    print("found cart button with tag name div with text")
                                     add_to_cart= True
                                     checkout(go_product_page,add_to_cart)
                                 except NoSuchElementException:
-                                    add_to_cart= False
-                                    checkout(go_product_page,add_to_cart)
-                                    print("Could not find add to cart element")
-          
-        
-                
+                                    try:
+                                        xpath="//span[contains(@value,'{0}')]"
+                                        formatXpath= xpath.format(cart_text)
+                                        driver.find_element_by_xpath(formatXpath).click()
+                                        time.sleep(3)
+                                        driver.save_screenshot("add-to-cart.png")
+                                        print("found cart button with span value")
+                                        add_to_cart= True
+                                        checkout(go_product_page,add_to_cart)
+                                    except NoSuchElementException:
+                                        add_to_cart= False
+                                        checkout(go_product_page,add_to_cart)
+                                        print("Could not find add to cart element")
+            
+            
+                    
 
-       
+        
 
