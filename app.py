@@ -231,16 +231,15 @@ def charge():
 @app.route("/proplan", methods=['POST'])
 def pro():
     data= request.get_json()
-    first_step_text= data['first']
-    second_step_text= data['second']
-    third_step_text= data['third']
-    product_url=data['productPage']
-    home= data['home']
-
-    isPro= True
     print(data)
-    # first_action,second_action,home,isPro
-    run_check(product_url,first_step_text,third_step_text,home,second_step_text,isPro)
+    add_to_cart= data['first']
+    xml_path= data['xmlPath2']
+    text_input= data['second']
+    continue_checkout= data['third']
+    isPro= True
+    product_url= data['productPage']
+    home= data['home']
+    run_check(product_url,add_to_cart,continue_checkout,home,xml_path,text_input,isPro)
     return jsonify({'data':data})
 
 @app.route("/upgrade", methods=['POST'])

@@ -22,7 +22,7 @@ from selenium.webdriver.common.keys import Keys
 
 
 # home_url,placeholder_email,first_name,last_name,address,city,post_code
-def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
+def run_check(url,cart_text,checkout_text,home_url,xml_path=None,third=None,isPro=False):
     print("****",third)
     print(cart_text) 
     # Gets the path to the right chromedriver
@@ -577,9 +577,10 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                                     takeScreenshot(go_product_page,add_to_cart,checkout)
                                     print("Can't find checkout button")
 
-            def changeInput(go_product_page,add_to_cart,third):
+            def changeInput(go_product_page,add_to_cart,third,xml_path):
                 try:
-                    xpath="//input[@name='updates[12513323647024]']"
+                    print(xml_path)
+                    xpath=f"{xml_path}"
                     # formatXpath= xpath.format(address)
                     testinput= driver.find_element_by_xpath(xpath)
                     testinput.send_keys(Keys.BACKSPACE)
@@ -611,7 +612,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                     time.sleep(3)
                     driver.save_screenshot("add-to-cart.png")
                     add_to_cart= True
-                    changeInput(go_product_page,add_to_cart,third)
+                    changeInput(go_product_page,add_to_cart,third,xml_path)
             except NoSuchElementException:
                 try:
                     xpath="//input[contains(@value,'{0}')]"
@@ -622,7 +623,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                         driver.save_screenshot("add-to-cart.png")
                         print("found cart button with input value")
                         add_to_cart= True
-                        changeInput(go_product_page,add_to_cart,third)
+                        changeInput(go_product_page,add_to_cart,third,xml_path)
                 except NoSuchElementException:
                     # Find cart BUTTON element with text/value
                     try:
@@ -633,7 +634,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                         driver.save_screenshot("add-to-cart.png")
                         print("found cart button with tag name button with text")
                         add_to_cart= True
-                        changeInput(go_product_page,add_to_cart,third)
+                        changeInput(go_product_page,add_to_cart,third,xml_path)
                     except NoSuchElementException:
                         try: 
                             xpath="//button[contains(@value,'{0}')]"
@@ -643,7 +644,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                             driver.save_screenshot("add-to-cart.png")
                             print("found cart button with button value")
                             add_to_cart= True
-                            changeInput(go_product_page,add_to_cart,third)
+                            changeInput(go_product_page,add_to_cart,third,xml_path)
                         except NoSuchElementException:
                             # Find cart SPAN element element with text/value
                             try:
@@ -654,7 +655,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                                 driver.save_screenshot("add-to-cart.png")
                                 print("found cart button with tag name span with text")
                                 add_to_cart= True
-                                changeInput(go_product_page,add_to_cart)
+                                changeInput(go_product_page,add_to_cart,third,xml_path)
                             except NoSuchElementException:
                                 try:
                                     xpath="//div[contains(text(),'{0}')]"
@@ -664,7 +665,7 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                                     driver.save_screenshot("add-to-cart.png")
                                     print("found cart button with tag name div with text")
                                     add_to_cart= True
-                                    changeInput(go_product_page,add_to_cart,third)
+                                    changeInput(go_product_page,add_to_cart,third,xml_path)
                                 except NoSuchElementException:
                                     try:
                                         xpath="//span[contains(@value,'{0}')]"
@@ -674,10 +675,10 @@ def run_check(url,cart_text,checkout_text,home_url,third=None,isPro=False):
                                         driver.save_screenshot("add-to-cart.png")
                                         print("found cart button with span value")
                                         add_to_cart= True
-                                        changeInput(go_product_page,add_to_cart,third)
+                                        changeInput(go_product_page,add_to_cart,third,xml_path)
                                     except NoSuchElementException:
                                         add_to_cart= False
-                                        changeInput(go_product_page,add_to_cart)
+                                        changeInput(go_product_page,add_to_cart,third,xml_path)
                                         print("Could not find add to cart element")           
         else:
             #NORMAL
