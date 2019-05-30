@@ -80,7 +80,7 @@ def run_check(url,cart_text,checkout_text,home_url,xml_path=None,third=None,isPr
                 time.sleep(2)
 
                 driver.switch_to.frame(2)
-                driver.find_element_by_id("name").send_keys("Charles Lee")
+                driver.find_element_by_id("name").send_keys("Javi Garcia")
                 time.sleep(2)
                 driver.switch_to_default_content()
 
@@ -385,20 +385,20 @@ def run_check(url,cart_text,checkout_text,home_url,xml_path=None,third=None,isPr
                 
                 xpath="//input[contains(@placeholder,'First name')]"
                 firstname= driver.find_element_by_xpath(xpath)
-                firstname.send_keys("Charles")
+                firstname.send_keys("Javi")
                 print("type first name")
                 time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Last name')]"
                 lastname= driver.find_element_by_xpath(xpath)
-                lastname.send_keys("Lee")
+                lastname.send_keys("Garcia")
                 print("print last name")
                 time.sleep(1)
 
                 xpath="//input[contains(@placeholder,'Address')]"
                 # formatXpath= xpath.format(address)
                 testaddress= driver.find_element_by_xpath(xpath)
-                testaddress.send_keys("12 Copac Square")
+                testaddress.send_keys("365 Nguyen Hue ")
                 print("print address")
                 time.sleep(1)
 
